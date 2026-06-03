@@ -1,0 +1,19 @@
+# Local config
+src/secrets.h
+secrets.h
+.env
+.env.local
+*.local
+
+# Arduino / PlatformIO build output
+build/
+dist/
+.pio/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
