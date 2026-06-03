@@ -2,88 +2,140 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ESP-DUCK Online Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32-HID Console</title>
   <style>
-    body{margin:0;min-height:100vh;background:#0b1020;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
-    main{max-width:900px;margin:0 auto;padding:28px 14px}
-    h1{font-size:40px;margin:0 0 8px}
-    p{color:#94a3b8;line-height:1.7}
-    .card{background:#111827;border:1px solid #243244;border-radius:18px;padding:18px;margin-top:16px}
-    label{display:block;margin:12px 0 7px;color:#94a3b8}
-    input,textarea{width:100%;box-sizing:border-box;border:1px solid #243244;border-radius:12px;background:#06101f;color:#e5e7eb;padding:11px 12px;font:inherit}
-    textarea{min-height:240px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-    button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer;background:#22c55e;color:#04110a;margin-top:14px}
-    pre{white-space:pre-wrap;word-break:break-word;background:#020617;border:1px solid #243244;border-radius:12px;padding:12px;color:#cbd5e1}
+    :root{--bg:#f4f6fb;--side:#0f172a;--sideText:#cbd5e1;--sideActive:#2563eb;--card:#fff;--text:#1f2937;--muted:#6b7280;--border:#e5e7eb;--primary:#2563eb;--primaryDark:#1d4ed8;--secondary:#eef2f7;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--shadow:0 10px 30px rgba(15,23,42,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}.sidebar{background:var(--side);color:var(--sideText);padding:22px 16px;position:sticky;top:0;height:100vh}.brand{margin-bottom:24px}.brand-title{color:#fff;font-size:21px;font-weight:700;margin-bottom:6px}.brand-sub{color:#94a3b8;font-size:13px;line-height:1.5}.nav{display:grid;gap:8px}.nav button{width:100%;text-align:left;border:none;background:transparent;color:var(--sideText);padding:11px 12px;border-radius:12px;cursor:pointer;font-size:15px}.nav button.active{background:var(--sideActive);color:#fff}.main{padding:24px;max-width:1180px;width:100%}.mobile-tabs{display:none;overflow-x:auto;gap:8px;padding-bottom:12px;margin-bottom:12px}.mobile-tabs button{flex:0 0 auto;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:999px;padding:9px 13px;font-size:14px}.mobile-tabs button.active{background:var(--primary);color:#fff;border-color:var(--primary)}.page{display:none}.page.active{display:block}.page-header{margin-bottom:16px}.page-header h1{margin:0 0 8px;font-size:28px}.page-header p{margin:0;color:var(--muted);line-height:1.7;font-size:14px}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}.card h2{margin:0 0 12px;font-size:20px}.desc{color:var(--muted);font-size:14px;line-height:1.8;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{border:1px solid var(--border);background:#f9fafb;border-radius:16px;padding:14px}.stat-label{font-size:13px;color:var(--muted);margin-bottom:6px}.stat-value{font-size:18px;font-weight:700}.field{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:10px}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}.field input,.field select{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 10px;font-size:14px;outline:none;background:#fff;color:var(--text)}textarea{width:100%;height:42vh;min-height:280px;resize:vertical;border:1px solid var(--border);border-radius:14px;padding:14px;font-size:14px;line-height:1.6;outline:none;background:#fbfdff;color:var(--text);font-family:Consolas,"JetBrains Mono","SFMono-Regular",monospace}textarea:focus,input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}button{border:none;border-radius:12px;padding:11px 18px;font-size:15px;cursor:pointer;transition:.15s ease}button:hover{transform:translateY(-1px)}button:disabled{cursor:not-allowed;opacity:.55;transform:none}.primary{color:#fff;background:var(--primary)}.primary:hover{background:var(--primaryDark)}.secondary{color:var(--text);background:var(--secondary)}.danger{color:#fff;background:var(--danger)}.status{font-size:13px;color:var(--muted)}.status.ok{color:var(--success)}.status.warn{color:var(--warning)}.status.err{color:var(--danger)}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}.counter{margin-left:auto;color:var(--muted);font-size:13px}.hint{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.8;background:#fafafa;border:1px dashed var(--border);border-radius:12px;padding:12px 14px}.log{height:360px;overflow:auto;background:#0f172a;color:#d1d5db;border-radius:14px;padding:12px;font-family:Consolas,"JetBrains Mono",monospace;font-size:13px;white-space:pre-wrap}.switch-row{display:flex;align-items:center;gap:10px;color:var(--text);font-size:14px;margin:8px 0 14px}.switch-row input{width:auto}.wifi-list{display:grid;gap:8px;margin-top:12px}.wifi-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--border);background:#f9fafb;border-radius:14px;padding:12px;cursor:pointer}.wifi-item:hover{border-color:var(--primary);background:#eff6ff}.wifi-main{min-width:0}.wifi-ssid{font-weight:700;margin-bottom:4px;word-break:break-all}.wifi-meta{font-size:13px;color:var(--muted)}.wifi-signal{text-align:right;font-size:13px;color:var(--muted)}.signal-icon{display:inline-flex;align-items:flex-end;gap:2px;height:18px;margin-bottom:4px}.signal-icon span{display:block;width:4px;border-radius:999px;background:#cbd5e1}.signal-icon span:nth-child(1){height:5px}.signal-icon span:nth-child(2){height:9px}.signal-icon span:nth-child(3){height:13px}.signal-icon span:nth-child(4){height:17px}.signal-icon.level-1 span:nth-child(-n+1),.signal-icon.level-2 span:nth-child(-n+2),.signal-icon.level-3 span:nth-child(-n+3),.signal-icon.level-4 span:nth-child(-n+4){background:var(--primary)}.signal-icon.level-1 span:nth-child(1){background:var(--warning)}.wifi-selected{border-color:var(--primary);background:#eff6ff}.wifi-empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:12px;background:#fafafa}.send-alert,.conn-alert{border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;border-radius:16px;padding:14px 16px;margin-bottom:14px}.send-alert.hidden,.conn-alert.hidden{display:none}.send-alert-title,.conn-alert-title{font-size:16px;font-weight:700;margin-bottom:6px}.send-alert-text,.conn-alert-text{font-size:14px;line-height:1.7}.send-alert.warn,.conn-alert.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}.send-alert.ok,.conn-alert.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}.send-alert.err,.conn-alert.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}@media(max-width:900px){.app{display:block}.sidebar{display:none}.main{padding:14px}.mobile-tabs{display:flex}.grid,.grid.two{grid-template-columns:1fr}.page-header h1{font-size:24px}.counter{margin-left:0;width:100%}.actions button{flex:1 1 auto}textarea{height:45vh;min-height:240px}}
   </style>
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
 </head>
 <body>
-<main>
-  <h1>🦆 ESP-DUCK Online Console</h1>
-  <p>这是可部署到 Vercel 的示例页面，用于向 ESP-DUCK 的 <code>/api/message</code> 发送 JSON 请求。</p>
+<div class="app">
+  <aside class="sidebar"><div class="brand"><div class="brand-title">ESP32-HID Console</div><div class="brand-sub">USB / Wi-Fi 双模式控制台</div></div><nav class="nav"><button class="active" data-page="overview" onclick="showPage('overview')">总览</button><button data-page="type" onclick="showPage('type')">文本输入</button><button data-page="connection" onclick="showPage('connection')">连接方式</button><button data-page="wifi" onclick="showPage('wifi')">Wi-Fi 设置</button><button data-page="keepalive" onclick="showPage('keepalive')">保活模式</button><button data-page="advanced" onclick="showPage('advanced')">高级参数</button><button data-page="logs" onclick="showPage('logs')">日志</button></nav></aside>
+  <main class="main">
+    <div class="mobile-tabs"><button class="active" data-page="overview" onclick="showPage('overview')">总览</button><button data-page="type" onclick="showPage('type')">输入</button><button data-page="connection" onclick="showPage('connection')">连接</button><button data-page="wifi" onclick="showPage('wifi')">Wi-Fi</button><button data-page="keepalive" onclick="showPage('keepalive')">保活</button><button data-page="advanced" onclick="showPage('advanced')">参数</button><button data-page="logs" onclick="showPage('logs')">日志</button></div>
 
-  <div class="card">
-    <label>Device API URL</label>
-    <input id="url" value="http://192.168.1.100/api/message">
+    <section class="page active" id="page-overview"><div class="page-header"><h1>总览</h1><p>查看当前连接、Wi-Fi、保活和文本状态。</p></div><div class="grid"><div class="stat"><div class="stat-label">当前模式</div><div class="stat-value" id="statMode">USB 串口模式</div></div><div class="stat"><div class="stat-label">USB 连接</div><div class="stat-value" id="statUsb">未连接</div></div><div class="stat"><div class="stat-label">Wi-Fi 设备</div><div class="stat-value" id="statWifi">未配置</div></div><div class="stat"><div class="stat-label">保活模式</div><div class="stat-value" id="statKeepAlive">关闭</div></div><div class="stat"><div class="stat-label">文本长度</div><div class="stat-value" id="statTextLen">0</div></div><div class="stat"><div class="stat-label">设备状态</div><div class="stat-value" id="statDevice">未知</div></div></div></section>
 
-    <label>Token</label>
-    <input id="token" type="password" placeholder="CHANGE_ME_WEB_PASSWORD">
+    <section class="page" id="page-type"><div class="page-header"><h1>文本输入</h1><p>输入或粘贴内容，点击发送后开发板会通过 USB HID 打到目标设备。</p></div><div class="card"><div class="send-alert hidden" id="sendAlert"><div class="send-alert-title" id="sendAlertTitle">准备发送</div><div class="send-alert-text" id="sendAlertText">请把光标放到目标窗口。</div></div><div class="grid" style="margin-bottom:12px">
+  <div class="field"><label>发送模式</label><select id="sendContentMode"><option value="text" selected>普通文本</option><option value="base64">Base64 纯输出</option></select></div>
+  <div class="field"><label>中文处理</label><select id="chineseMode"><option value="keep" selected>保留中文</option><option value="skip">跳过中文</option><option value="pinyin">中文转拼音</option></select></div>
+  <div class="field"><label>速度档位</label><select id="speedPreset"><option value="safe">保守：20ms/字符</option><option value="normal" selected>推荐：10ms/字符</option><option value="fast">激进：5ms/字符</option><option value="extreme">极限：2ms/字符</option></select></div>
+</div><textarea id="text" placeholder="在这里输入或粘贴内容。Base64 模式会只保留 A-Z a-z 0-9 + / = 并按 76 字符分行。"></textarea><div class="toolbar"><div class="status ok" id="draftStatus">已启用自动暂存</div><div class="counter" id="counter">0 字符</div></div><div class="actions"><button class="primary" id="sendBtn" onclick="sendText()" disabled>发送，并开始倒计时输入</button><button class="secondary" onclick="saveDraft(true)">保存暂存</button><button class="secondary" onclick="loadDraft(true)">恢复暂存</button><button class="danger" onclick="clearDraft()">清空暂存</button></div></div></section>
 
-    <label>Text</label>
-    <textarea id="text">echo Hello from ESP-DUCK</textarea>
+    <section class="page" id="page-connection"><div class="page-header"><h1>连接方式</h1><p>USB 模式通过 Web Serial 连接开发板 UART 口；Wi-Fi 模式通过开发板 IP 调用接口。</p></div><div class="card"><h2>USB 串口模式</h2><p class="desc">A 电脑连接开发板 UART 口，浏览器通过串口发送文本和设置；开发板另一个 USB 口接 B 设备，作为 HID 键盘输出。</p><div class="actions"><button class="primary" id="connectBtn" onclick="connectSerial()">连接开发板</button><button class="secondary" id="disconnectBtn" onclick="disconnectSerial()" disabled>断开连接</button><button class="secondary" onclick="queryStatus()" id="statusBtn" disabled>查询状态</button><button class="secondary" onclick="switchToUsbMode()">切换到 USB 模式</button><div class="status warn" id="serialStatus">未连接</div></div><div class="hint">使用前请关闭 Arduino IDE 串口监视器。连接时选择开发板 UART 口对应的 COM 口。</div></div><div class="card"><h2>Wi-Fi 局域网模式</h2><p class="desc">输入开发板 IP 后，可以通过 HTTP 接口访问开发板。公网 HTTPS 页面直连局域网 HTTP 可能被浏览器拦截；这种情况请直接打开开发板网页。</p><div class="conn-alert hidden" id="wifiConnAlert"><div class="conn-alert-title" id="wifiConnTitle">连接状态</div><div class="conn-alert-text" id="wifiConnText"></div></div><div class="grid two"><div class="field"><label>开发板 IP</label><input id="wifiDeviceIp" placeholder="例如 192.168.1.123"></div><div class="field"><label>访问密码 Token</label><input id="wifiToken" value="CHANGE_ME_WEB_PASSWORD"></div></div><div class="actions"><button class="secondary" onclick="saveWifiIp()">保存 IP</button><button class="secondary" onclick="testWifiConnection()">测试连接</button><button class="primary" onclick="switchToWifiMode()">切换到 Wi-Fi 模式</button><button class="secondary" onclick="openDevicePage()">打开开发板网页</button></div></div></section>
 
-    <button onclick="sendText()">🚀 Send</button>
-    <button onclick="status()">📡 Status</button>
+    <section class="page" id="page-wifi"><div class="page-header"><h1>Wi-Fi 设置</h1><p>通过 USB 串口扫描并保存 Wi-Fi。ESP32-S3 仅支持 2.4GHz Wi-Fi。</p></div><div class="card"><h2>通过 USB 配置 Wi-Fi</h2><div class="actions"><button class="primary" onclick="scanWifiByUsb()" id="scanWifiBtn" disabled>扫描 Wi-Fi</button><button class="secondary" onclick="queryWifiStatus()" id="wifiStatusBtn" disabled>查询 Wi-Fi 状态</button><button class="danger" onclick="clearWifiConfig()" id="wifiClearBtn" disabled>清空 Wi-Fi 配置</button></div><div class="wifi-list" id="wifiList"><div class="wifi-empty">暂无扫描结果。请先点击“扫描 Wi-Fi”。</div></div><div class="grid two" style="margin-top:12px"><div class="field"><label>SSID</label><input id="wifiSsid" placeholder="选择或手动输入 SSID"></div><div class="field"><label>Wi-Fi 密码</label><input id="wifiPassword" type="password" placeholder="输入 Wi-Fi 密码"></div></div><div class="actions"><button class="primary" onclick="saveWifiByUsb()" id="saveWifiBtn" disabled>保存并连接</button></div></div></section>
 
-    <pre id="log">ready</pre>
-  </div>
+    <section class="page" id="page-keepalive"><div class="page-header"><h1>保活模式</h1><p>开启后开发板会按指定动作保活。正在发送文本时会暂停保活。</p></div><div class="card"><div class="switch-row"><input id="keepAliveEnabled" type="checkbox"><label for="keepAliveEnabled">启用保活模式</label></div><div class="grid two"><div class="field"><label>保活间隔 秒</label><input id="keepAliveInterval" type="number" value="180" min="10" max="86400"></div><div class="field"><label>保活动作</label><select id="keepAliveAction"><option value="mouse_move">鼠标轻微移动</option><option value="mouse_click">鼠标左键点击 1 次</option><option value="f5">按一次 F5</option><option value="click_f5" selected>鼠标左键点击 1 次 + F5 1 次</option><option value="click_f5_loop">鼠标点击 + F5，间隔 1 秒，共 10 次</option></select></div></div><div class="actions"><button class="primary" id="settingsBtn" onclick="sendSettings()" disabled>保存保活设置</button></div><div class="hint">默认保活动作为“鼠标点击 + F5”。复杂动作会影响当前窗口，适合需要刷新页面/界面的场景，测试前请确认光标和窗口位置。</div></div></section>
 
-  <p>注意：公网 HTTPS 页面访问局域网 HTTP 设备时，可能受到浏览器 mixed content、CORS 或 Private Network Access 限制。设备内置 WebUI 更适合离线使用。</p>
-</main>
+    <section class="page" id="page-advanced"><div class="page-header"><h1>高级参数</h1><p>这些参数会影响 HID 输入速度和稳定性。</p></div><div class="card"><div class="grid"><div class="field"><label>普通字符延迟 ms</label><input id="charDelay" type="number" value="70" min="1" max="800"></div><div class="field"><label>特殊字符延迟 ms</label><input id="riskDelay" type="number" value="140" min="1" max="1000"></div><div class="field"><label>换行后等待 ms</label><input id="lineDelay" type="number" value="400" min="0" max="2000"></div><div class="field"><label>行首等待 ms</label><input id="lineStartDelay" type="number" value="150" min="0" max="1000"></div><div class="field"><label>每段字符数</label><input id="chunkSize" type="number" value="24" min="1" max="240"></div><div class="field"><label>每段暂停 ms</label><input id="chunkDelay" type="number" value="120" min="0" max="1000"></div><div class="field"><label>发送前倒计时 ms</label><input id="startDelay" type="number" value="3000" min="1000" max="30000"></div></div></div></section>
+
+    <section class="page" id="page-logs"><div class="page-header"><h1>日志</h1><p>查看 USB 串口返回、发送记录、错误提示。</p></div><div class="card"><div class="log" id="log"></div><div class="actions"><button class="secondary" onclick="clearLog()">清空日志</button></div></div></section>
+  </main>
+</div>
 
 <script>
-  function log(obj) {
-    document.getElementById("log").textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
-  }
+const draftKey="esp32_hid_console_draft_v3";
+const wifiIpKey="esp32_hid_wifi_ip";
+const modeKey="esp32_hid_current_mode";
+let port=null, writer=null, reader=null, readLoopRunning=false;
+let currentMode=localStorage.getItem(modeKey)==="wifi"?"wifi":"usb";
+let serialTextBuffer="";
+let usbPendingResponses=[];
+const SERIAL_RAW_LOG=false;
+let lastWifiNetworks=[];
+let sendCountdownTimer=null;
+const draftIds=["text","sendContentMode","chineseMode","speedPreset","charDelay","riskDelay","lineDelay","lineStartDelay","chunkSize","chunkDelay","startDelay","keepAliveEnabled","keepAliveInterval","keepAliveAction","wifiDeviceIp","wifiToken","wifiSsid","wifiPassword"];
 
-  async function post(payload) {
-    payload.token = document.getElementById("token").value;
-    const res = await fetch(document.getElementById("url").value, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload)
-    });
-    return await res.json();
-  }
+const SPEED_PRESETS={
+  safe:{label:"保守",charDelay:20,riskDelay:20,lineDelay:100,lineStartDelay:0,chunkSize:76,chunkDelay:50},
+  normal:{label:"推荐",charDelay:10,riskDelay:10,lineDelay:50,lineStartDelay:0,chunkSize:76,chunkDelay:30},
+  fast:{label:"激进",charDelay:5,riskDelay:5,lineDelay:30,lineStartDelay:0,chunkSize:76,chunkDelay:20},
+  extreme:{label:"极限",charDelay:2,riskDelay:2,lineDelay:20,lineStartDelay:0,chunkSize:76,chunkDelay:10}
+};
+function getSelectedSpeed(){const key=document.getElementById('speedPreset')?.value||'normal';return SPEED_PRESETS[key]||SPEED_PRESETS.normal;}
+function applySpeedPreset(){const s=getSelectedSpeed();['charDelay','riskDelay','lineDelay','lineStartDelay','chunkSize','chunkDelay'].forEach(id=>{const el=document.getElementById(id);if(el&&s[id]!==undefined)el.value=s[id];});saveDraft(false);updateCounter();}
+function isChineseChar(ch){return /[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);}
+function normalizeBase64(text,lineLength=76){const pure=String(text||'').replace(/[^A-Za-z0-9+/=]/g,'');if(!pure)return'';return pure.replace(new RegExp('(.{'+lineLength+'})','g'),'$1\n').trimEnd();}
+function skipChineseChars(text){return Array.from(String(text||'')).filter(ch=>!isChineseChar(ch)).join('');}
+function convertChineseToPinyin(text){
+  const lib=window.pinyinPro;
+  if(!lib||typeof lib.pinyin!=='function')throw new Error('当前页面没有加载 pinyin-pro，不能使用中文转拼音。在线页需要联网加载 CDN，设备页需要把 pinyin-pro.js 放到 LittleFS 根目录。');
+  return lib.pinyin(String(text||''),{toneType:'none',type:'array',nonZh:'consecutive'}).join('');
+}
+function getProcessedText(raw){
+  const mode=document.getElementById('sendContentMode')?.value||'text';
+  if(mode==='base64')return normalizeBase64(raw,76);
+  const chineseMode=document.getElementById('chineseMode')?.value||'keep';
+  if(chineseMode==='skip')return skipChineseChars(raw);
+  if(chineseMode==='pinyin')return convertChineseToPinyin(raw);
+  return String(raw||'');
+}
+function getEffectiveConfig(){const cfg=collectConfig();const mode=document.getElementById('sendContentMode')?.value||'text';const speed=getSelectedSpeed();cfg.inputMode=mode;cfg.speedPreset=document.getElementById('speedPreset')?.value||'normal';cfg.speedLabel=speed.label;return cfg;}
 
-  async function sendText() {
-    try {
-      const result = await post({
-        type: "type",
-        text: document.getElementById("text").value,
-        config: {
-          charDelay: 70,
-          riskDelay: 140,
-          lineDelay: 400,
-          lineStartDelay: 150,
-          chunkSize: 24,
-          chunkDelay: 120,
-          startDelay: 5000
-        }
-      });
-      log(result);
-    } catch (e) {
-      log("error: " + e.message);
-    }
-  }
 
-  async function status() {
-    try {
-      log(await post({type: "status"}));
-    } catch (e) {
-      log("error: " + e.message);
-    }
-  }
+function showPage(name){document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));document.getElementById("page-"+name).classList.add("active");document.querySelectorAll(".nav button,.mobile-tabs button").forEach(btn=>btn.classList.toggle("active",btn.dataset.page===name));}
+function log(msg){const el=document.getElementById("log");if(!el)return;const now=new Date().toLocaleTimeString();const line="["+now+"] "+String(msg).slice(0,3000)+"\n";el.textContent+=line;if(el.textContent.length>60000)el.textContent=el.textContent.slice(-45000);el.scrollTop=el.scrollHeight;}
+function clearLog(){document.getElementById("log").textContent="";}
+function setWifiConnAlert(type,title,text){const box=document.getElementById("wifiConnAlert");box.className="conn-alert "+(type||"");document.getElementById("wifiConnTitle").innerText=title;document.getElementById("wifiConnText").innerText=text;}
+function showSendAlert(type,title,text){const box=document.getElementById("sendAlert");box.className="send-alert "+(type||"");document.getElementById("sendAlertTitle").innerText=title;document.getElementById("sendAlertText").innerText=text;}
+function startSendCountdown(ms){if(sendCountdownTimer)clearInterval(sendCountdownTimer);let remain=Math.ceil(ms/1000);showSendAlert("warn","已发送到开发板，准备输入","请在 "+remain+" 秒内把光标放到目标窗口。倒计时结束后开发板会开始输入。");sendCountdownTimer=setInterval(()=>{remain--;if(remain>0){showSendAlert("warn","已发送到开发板，准备输入","请在 "+remain+" 秒内把光标放到目标窗口。倒计时结束后开发板会开始输入。");return;}clearInterval(sendCountdownTimer);sendCountdownTimer=null;showSendAlert("ok","正在输入","开发板应该已经开始模拟键盘输入。请不要移动光标或切换窗口。");},1000);}
+function setSerialStatus(text,cls){const el=document.getElementById("serialStatus");el.innerText=text;el.className="status "+cls;}
+function setMode(mode){currentMode=mode==="wifi"?"wifi":"usb";localStorage.setItem(modeKey,currentMode);updateOverview();refreshActionButtons();log("当前模式："+(currentMode==="wifi"?"Wi-Fi 模式":"USB 串口模式"));}
+function isUsbConnected(){return !!writer;}
+function isWifiReady(){return !!document.getElementById("wifiDeviceIp").value.trim();}
+function canSendCommand(){return currentMode==="usb"?isUsbConnected():isWifiReady();}
+function refreshActionButtons(){const enabled=canSendCommand();const usbConnected=isUsbConnected();document.getElementById("sendBtn").disabled=!enabled;document.getElementById("settingsBtn").disabled=!enabled;document.getElementById("statusBtn").disabled=!enabled;document.getElementById("scanWifiBtn").disabled=!usbConnected;document.getElementById("wifiStatusBtn").disabled=!usbConnected;document.getElementById("wifiClearBtn").disabled=!usbConnected;document.getElementById("saveWifiBtn").disabled=!usbConnected;document.getElementById("statMode").innerText=currentMode==="wifi"?"Wi-Fi 模式":"USB 串口模式";}
+function setConnectedState(connected){document.getElementById("connectBtn").disabled=connected;document.getElementById("disconnectBtn").disabled=!connected;document.getElementById("statUsb").innerText=connected?"已连接":"未连接";document.getElementById("statDevice").innerText=connected||isWifiReady()?"在线":"未知";setSerialStatus(connected?"已连接":"未连接",connected?"ok":"warn");refreshActionButtons();}
+function updateOverview(){const text=document.getElementById("text").value||"";document.getElementById("statTextLen").innerText=String(text.length);document.getElementById("statKeepAlive").innerText=document.getElementById("keepAliveEnabled").checked?"开启":"关闭";document.getElementById("statMode").innerText=currentMode==="usb"?"USB 串口模式":"Wi-Fi 模式";}
+function getNumber(id){return Number(document.getElementById(id).value);}
+function normalizeKeepAliveAction(){const el=document.getElementById("keepAliveAction");if(!el)return;const allowed=[...el.options].map(o=>o.value);if(!allowed.includes(el.value))el.value="click_f5";}
+function setKeepAliveActionValue(value){const el=document.getElementById("keepAliveAction");if(!el)return;const allowed=[...el.options].map(o=>o.value);el.value=allowed.includes(value)?value:"click_f5";}
+function collectConfig(){return{charDelay:getNumber("charDelay"),riskDelay:getNumber("riskDelay"),lineDelay:getNumber("lineDelay"),lineStartDelay:getNumber("lineStartDelay"),chunkSize:getNumber("chunkSize"),chunkDelay:getNumber("chunkDelay"),startDelay:getNumber("startDelay")};}
+function collectDraft(){const data={};draftIds.forEach(id=>{const el=document.getElementById(id);if(!el)return;data[id]=el.type==="checkbox"?el.checked:el.value;});return data;}
+function applyDraft(data){if(!data)return;draftIds.forEach(id=>{const el=document.getElementById(id);if(!el||data[id]===undefined)return;if(el.type==="checkbox")el.checked=!!data[id];else el.value=data[id];});normalizeKeepAliveAction();updateCounter();updateOverview();}
+function saveDraft(showMsg){localStorage.setItem(draftKey,JSON.stringify(collectDraft()));updateCounter();updateOverview();if(showMsg)document.getElementById("draftStatus").innerText="已保存暂存";}
+function loadDraft(showMsg){const raw=localStorage.getItem(draftKey);if(!raw){if(showMsg)document.getElementById("draftStatus").innerText="没有找到暂存内容";return;}try{applyDraft(JSON.parse(raw));if(showMsg)document.getElementById("draftStatus").innerText="已恢复暂存";}catch(e){if(showMsg)document.getElementById("draftStatus").innerText="暂存内容损坏，恢复失败";}}
+function clearDraft(){localStorage.removeItem(draftKey);document.getElementById("text").value="";updateCounter();updateOverview();document.getElementById("draftStatus").innerText="已清空暂存";}
+function updateCounter(){const text=document.getElementById("text").value||"";document.getElementById("counter").innerText=text.length+" 字符";document.getElementById("statTextLen").innerText=String(text.length);}
+async function connectSerial(){if(!("serial" in navigator)){alert("当前浏览器不支持 Web Serial。请使用 Chrome 或 Edge。");return;}try{port=await navigator.serial.requestPort();await port.open({baudRate:115200});writer=port.writable.getWriter();readLoopRunning=true;startReadLoop();setMode("usb");setConnectedState(true);log("串口已连接");}catch(e){log("连接失败："+e.message);setConnectedState(false);}}
+async function disconnectSerial(){try{readLoopRunning=false;if(reader){try{await reader.cancel();}catch(e){}reader=null;}if(writer){try{writer.releaseLock();}catch(e){}writer=null;}if(port){await port.close();port=null;}setConnectedState(false);updateOverview();log("串口已断开");}catch(e){log("断开失败："+e.message);}}
+async function startReadLoop(){const decoder=new TextDecoder();try{reader=port.readable.getReader();while(readLoopRunning){const {value,done}=await reader.read();if(done)break;if(value){const chunk=decoder.decode(value,{stream:true});if(SERIAL_RAW_LOG)log("开发板返回："+chunk);consumeSerialText(chunk);}}}catch(e){if(readLoopRunning)log("读取失败："+e.message);}finally{try{if(reader)reader.releaseLock();}catch(e){}reader=null;}}
+function consumeSerialText(chunk){serialTextBuffer+=chunk;if(serialTextBuffer.length>12000)serialTextBuffer=serialTextBuffer.slice(-6000);extractJsonObjectsFromBuffer();}
+function extractJsonObjectsFromBuffer(){while(true){const start=serialTextBuffer.indexOf("{");if(start<0){if(serialTextBuffer.length>2000)serialTextBuffer=serialTextBuffer.slice(-500);return;}if(start>0)serialTextBuffer=serialTextBuffer.slice(start);let depth=0,inString=false,escape=false,end=-1;for(let i=0;i<serialTextBuffer.length;i++){const ch=serialTextBuffer[i];if(escape){escape=false;continue;}if(ch==="\\"){escape=true;continue;}if(ch==='"'){inString=!inString;continue;}if(inString)continue;if(ch==="{")depth++;else if(ch==="}"){depth--;if(depth===0){end=i;break;}}}if(end<0)return;const jsonText=serialTextBuffer.slice(0,end+1);serialTextBuffer=serialTextBuffer.slice(end+1);try{handleDeviceJson(JSON.parse(jsonText));}catch(e){log("JSON 解析失败："+e.message);log(jsonText);}}}
+function signalLevel(rssi){if(rssi>=-55)return 4;if(rssi>=-67)return 3;if(rssi>=-75)return 2;return 1;}
+function signalIcon(rssi){const level=signalLevel(rssi);return `<div class="signal-icon level-${level}" title="RSSI ${rssi} dBm"><span></span><span></span><span></span><span></span></div>`;}
+function signalText(rssi){if(rssi>=-55)return"强";if(rssi>=-67)return"较强";if(rssi>=-75)return"一般";return"弱";}
+function escapeHtml(s){return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
+function renderWifiList(networks){const box=document.getElementById("wifiList");if(!box)return;lastWifiNetworks=networks||[];if(!lastWifiNetworks.length){box.innerHTML='<div class="wifi-empty">没有扫描到 Wi-Fi。请确认附近有 2.4GHz Wi-Fi。</div>';return;}const sorted=[...lastWifiNetworks].sort((a,b)=>(b.rssi||-999)-(a.rssi||-999));box.innerHTML=sorted.map((item,index)=>{const ssid=item.ssid||"";const rssi=Number(item.rssi||0);const channel=item.channel||"";const encrypted=item.encrypted?"加密":"开放";const safeSsid=escapeHtml(ssid);return `<div class="wifi-item" onclick="selectWifi(${index})"><div class="wifi-main"><div class="wifi-ssid">${safeSsid||"(隐藏 SSID)"}</div><div class="wifi-meta">信道 ${channel} · ${encrypted} · RSSI ${rssi} dBm</div></div><div class="wifi-signal">${signalIcon(rssi)}<div>${signalText(rssi)}</div></div></div>`;}).join("");log("Wi-Fi 列表已渲染，共 "+sorted.length+" 个。");}
+function selectWifi(index){const sorted=[...lastWifiNetworks].sort((a,b)=>(b.rssi||-999)-(a.rssi||-999));const item=sorted[index];if(!item)return;document.getElementById("wifiSsid").value=item.ssid||"";saveDraft(false);document.querySelectorAll(".wifi-item").forEach(el=>el.classList.remove("wifi-selected"));const nodes=document.querySelectorAll(".wifi-item");if(nodes[index])nodes[index].classList.add("wifi-selected");log("已选择 Wi-Fi："+(item.ssid||"(隐藏 SSID)"));}
+function waitForUsbResponse(timeoutMs){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{usbPendingResponses=usbPendingResponses.filter(x=>x.resolve!==resolve);reject(new Error("USB 等待设备返回超时"));},timeoutMs);usbPendingResponses.push({resolve,reject,timer});});}
+function resolveUsbResponse(obj){if(!obj||obj.msg==="ready")return;const item=usbPendingResponses.shift();if(!item)return;clearTimeout(item.timer);item.resolve(obj);}
+function estimateUsbTimeout(obj){if(!obj||obj.type!=="type")return 15000;const text=String(obj.text||"");const cfg=obj.config||{};const charDelay=Number(cfg.charDelay||10);const lineDelay=Number(cfg.lineDelay||50);const chunkDelay=Number(cfg.chunkDelay||30);const chunkSize=Math.max(1,Number(cfg.chunkSize||76));const startDelay=Number(cfg.startDelay||3000);const lines=(text.match(/\n/g)||[]).length;const chunks=Math.ceil(text.length/chunkSize);return Math.max(30000,startDelay+text.length*charDelay+lines*lineDelay+chunks*chunkDelay+120000);}
+function applyDeviceTypingConfig(obj){["charDelay","riskDelay","lineDelay","lineStartDelay","chunkSize","chunkDelay","startDelay"].forEach(id=>{const el=document.getElementById(id);if(el&&obj[id]!==undefined)el.value=obj[id];});}
+function normalizeDeviceKeepAliveFromStatus(obj){if(obj.keepAliveAction)setKeepAliveActionValue(obj.keepAliveAction);normalizeKeepAliveAction();}
+
+function handleDeviceJson(obj){if(!obj||typeof obj!=="object")return;resolveUsbResponse(obj);if(obj.type==="wifi_scan"&&Array.isArray(obj.networks)){renderWifiList(obj.networks);return;}if(obj.type==="wifi_save"){if(obj.connected){log("Wi-Fi 连接成功，IP："+obj.ip);if(obj.ip){document.getElementById("wifiDeviceIp").value=obj.ip;saveWifiIp();}document.getElementById("statWifi").innerText=obj.ip||"已连接";setWifiConnAlert("ok","Wi-Fi 已连接","SSID："+obj.ssid+"\nIP："+obj.ip);}else{log("Wi-Fi 连接失败："+(obj.msg||"未知原因"));setWifiConnAlert("err","Wi-Fi 连接失败",obj.msg||"未知原因");}return;}if(obj.type==="wifi_status"){log("Wi-Fi 状态："+JSON.stringify(obj));document.getElementById("statWifi").innerText=obj.connected?(obj.ip||"已连接"):"未连接";if(obj.ip){document.getElementById("wifiDeviceIp").value=obj.ip;saveWifiIp();}return;}if(obj.type==="status"){log("设备状态："+JSON.stringify(obj));document.getElementById("statDevice").innerText="在线";document.getElementById("statKeepAlive").innerText=obj.keepAliveEnabled?"开启":"关闭";document.getElementById("statWifi").innerText=obj.wifiConnected?(obj.ip||"已连接"):"未连接";normalizeDeviceKeepAliveFromStatus(obj);applyDeviceTypingConfig(obj);setWifiConnAlert("ok","已连接到开发板","设备："+(obj.deviceName||"ESP32-S3")+"\n固件："+(obj.firmware||"未知")+"\nMAC："+(obj.mac||"未知")+"\nSSID："+(obj.wifiSsid||"未知")+"\nIP："+(obj.ip||"未知"));return;}if(obj.type==="settings"){log("设置已保存："+JSON.stringify(obj));document.getElementById("statKeepAlive").innerText=obj.keepAliveEnabled?"开启":"关闭";normalizeDeviceKeepAliveFromStatus(obj);return;}if(obj.ok===false){log("设备返回错误："+(obj.msg||JSON.stringify(obj)));setWifiConnAlert("err","设备返回错误",obj.msg||JSON.stringify(obj));return;}log("设备返回 JSON："+JSON.stringify(obj));}
+async function sendUsbPacket(obj){if(!writer){alert("请先连接开发板");return;}const json=JSON.stringify(obj);const encoder=new TextEncoder();const bodyBytes=encoder.encode(json);const header="ESPMSG:"+bodyBytes.length+"\n";const headerBytes=encoder.encode(header);const packet=new Uint8Array(headerBytes.length+bodyBytes.length);packet.set(headerBytes,0);packet.set(bodyBytes,headerBytes.length);const wait=waitForUsbResponse(estimateUsbTimeout(obj));await writer.write(packet);log("USB 已发送："+header.trim()+"，type="+(obj.type||"unknown"));return wait;}
+async function sendWifiMessage(obj){const ip=document.getElementById("wifiDeviceIp").value.trim();const token=document.getElementById("wifiToken").value||"CHANGE_ME_WEB_PASSWORD";if(!ip){alert("请先填写开发板 IP");return;}obj.token=token;const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),5000);try{const res=await fetch("http://"+ip+"/api/message",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj),signal:ctrl.signal});const data=await res.json();handleDeviceJson(data);log("Wi-Fi 返回："+JSON.stringify(data));return data;}finally{clearTimeout(timer);}}
+async function sendMessage(obj){if(currentMode==="usb")return sendUsbPacket(obj);return sendWifiMessage(obj);}
+async function sendText(){const raw=document.getElementById("text").value||"";let text="";try{text=getProcessedText(raw);}catch(e){showSendAlert("err","发送失败",e.message||"文本处理失败");log("文本处理失败："+(e.message||"未知错误"));return;}if(!text.length){showSendAlert("err","发送失败","处理后没有可发送内容。");return;}saveDraft(false);const cfg=getEffectiveConfig();const startDelay=cfg.startDelay;const speed=getSelectedSpeed();showSendAlert("warn","正在发送到开发板","文本已提交，准备开始倒计时。处理后长度："+text.length+" 字符。档位："+speed.label);try{const request=sendMessage({type:"type",text:text,config:cfg});startSendCountdown(startDelay);log("发送请求已提交。处理后长度："+text.length+" 字符；模式："+cfg.inputMode+"；档位："+speed.label);await request;showSendAlert("ok","输入完成","开发板已返回完成状态。处理后长度："+text.length+" 字符。");}catch(e){showSendAlert("err","发送失败",e.message||"未知错误");log("发送失败："+(e.message||"未知错误"));}}
+async function sendSettings(){saveDraft(false);try{await sendMessage({type:"settings",keepAliveEnabled:document.getElementById("keepAliveEnabled").checked,keepAliveInterval:getNumber("keepAliveInterval"),keepAliveAction:document.getElementById("keepAliveAction").value});updateOverview();}catch(e){log("保存保活设置失败："+(e.message||"未知错误"));}}
+async function queryStatus(){await sendMessage({type:"status"});}
+function saveWifiIp(){const ip=document.getElementById("wifiDeviceIp").value.trim();localStorage.setItem(wifiIpKey,ip);saveDraft(false);refreshActionButtons();log("已保存 Wi-Fi IP："+ip);}
+async function testWifiConnection(){const ip=document.getElementById("wifiDeviceIp").value.trim();if(!ip){alert("请先填写开发板 IP");return;}setMode("wifi");saveWifiIp();setWifiConnAlert("warn","正在测试连接","正在访问 http://"+ip+"/api/message ...");try{await queryStatus();refreshActionButtons();}catch(e){setWifiConnAlert("err","连接失败",(e.name==="AbortError"?"连接超时。":e.message)+"\n如果网页部署在公网 HTTPS，浏览器可能会阻止访问局域网 HTTP。可改用 USB 模式，或直接打开开发板网页。");log("Wi-Fi 测试连接失败："+(e.message||"未知错误"));}}
+function openDevicePage(){const ip=document.getElementById("wifiDeviceIp").value.trim();if(!ip){alert("请先填写开发板 IP");return;}window.open("http://"+ip,"_blank");}
+function switchToWifiMode(){const ip=document.getElementById("wifiDeviceIp").value.trim();if(!ip){alert("请先填写开发板 IP");return;}setMode("wifi");saveWifiIp();}
+function switchToUsbMode(){setMode("usb");}
+async function scanWifiByUsb(){const box=document.getElementById("wifiList");if(box)box.innerHTML='<div class="wifi-empty">正在扫描 Wi-Fi，通常需要 3 到 8 秒...</div>';setMode("usb");await sendMessage({type:"wifi_scan"});log("已发送 wifi_scan，等待开发板返回扫描结果。");}
+async function queryWifiStatus(){setMode("usb");await sendMessage({type:"wifi_status"});log("已发送 wifi_status。");}
+async function clearWifiConfig(){if(!confirm("确认清空开发板保存的 Wi-Fi 配置？"))return;setMode("usb");await sendMessage({type:"wifi_clear"});log("已发送 wifi_clear。");}
+async function saveWifiByUsb(){const ssid=document.getElementById("wifiSsid").value.trim();const password=document.getElementById("wifiPassword").value;if(!ssid){alert("SSID 不能为空");return;}setMode("usb");log("正在保存并连接 Wi-Fi："+ssid);await sendMessage({type:"wifi_save",ssid:ssid,password:password});}
+function initInputs(){draftIds.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.addEventListener("input",()=>{saveDraft(false);updateCounter();updateOverview();refreshActionButtons();});el.addEventListener("change",()=>{if(id==="speedPreset")applySpeedPreset();else{saveDraft(false);updateOverview();refreshActionButtons();}});});}
+window.addEventListener("DOMContentLoaded",()=>{const savedIp=localStorage.getItem(wifiIpKey);if(savedIp)document.getElementById("wifiDeviceIp").value=savedIp;loadDraft(false);normalizeKeepAliveAction();initInputs();setConnectedState(false);updateCounter();updateOverview();refreshActionButtons();log("控制台已加载。当前模式："+(currentMode==="wifi"?"Wi-Fi 模式":"USB 串口模式"));});
+window.addEventListener("beforeunload",()=>saveDraft(false));
 </script>
 </body>
 </html>
