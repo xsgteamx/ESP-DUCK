@@ -8,10 +8,14 @@
 #include "USBHIDMouse.h"
 
 // ===================== User Config =====================
-const char* WEB_PASSWORD = "CHANGE_ME_WEB_PASSWORD";        // 本地 Wi-Fi 网页和 /api/message token
-const char* SETUP_AP_SSID = "ESP-DUCK";
-const char* SETUP_AP_PASS = "CHANGE_ME_12345678";     // 至少 8 位
-const char* DEVICE_NAME = "ESP-DUCK";
+// Copy src/secrets.example.h to src/secrets.h and edit local values.
+// Do not commit src/secrets.h to GitHub.
+#if __has_include("secrets.h")
+#include "secrets.h"
+#else
+#include "secrets.example.h"
+#endif
+
 const char* FIRMWARE_VERSION = "2026-06-03-stable-usb-settings-v3";
 
 // ===================== Objects =====================
@@ -86,7 +90,7 @@ body{margin:0;padding:28px 14px;background:#f5f7fb;color:#1f2937;font-family:-ap
 
 const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ESP32-HID Wi-Fi 配置</title><style>
-body{margin:0;padding:20px 14px;background:#f5f7fb;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}.card{max-width:720px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:24px}p{color:#6b7280;line-height:1.7;font-size:14px}.field{margin-top:12px}label{display:block;color:#6b7280;font-size:13px;margin-bottom:6px}input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:11px;font-size:15px;box-sizing:border-box}button,a{display:inline-block;margin-top:14px;border:none;border-radius:12px;padding:11px 16px;font-size:15px;color:white;background:#2563eb;text-decoration:none;cursor:pointer}.secondary{background:#eef2f7;color:#1f2937}.danger{background:#dc2626;color:white}.hint{margin-top:14px;color:#6b7280;font-size:13px;line-height:1.8;background:#fafafa;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}</style></head><body><div class="card"><h1>ESP32-HID Wi-Fi 配置</h1><p>开发板当前处于配置热点模式。保存 Wi-Fi 后，串口会输出新 IP。</p><form method="POST" action="/portal_save"><div class="field"><label>SSID</label><input name="ssid" placeholder="输入 Wi-Fi 名称"></div><div class="field"><label>Wi-Fi 密码</label><input name="password" type="password" placeholder="输入 Wi-Fi 密码"></div><button type="submit">保存并连接</button><a class="secondary" href="/portal_scan">扫描 Wi-Fi</a><a class="danger" href="/portal_clear">清空配置</a></form><div class="hint">配置热点：ESP-DUCK<br>默认热点密码：CHANGE_ME_12345678<br>ESP32-S3 仅支持 2.4GHz Wi-Fi。</div></div></body></html>
+body{margin:0;padding:20px 14px;background:#f5f7fb;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}.card{max-width:720px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:24px}p{color:#6b7280;line-height:1.7;font-size:14px}.field{margin-top:12px}label{display:block;color:#6b7280;font-size:13px;margin-bottom:6px}input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:11px;font-size:15px;box-sizing:border-box}button,a{display:inline-block;margin-top:14px;border:none;border-radius:12px;padding:11px 16px;font-size:15px;color:white;background:#2563eb;text-decoration:none;cursor:pointer}.secondary{background:#eef2f7;color:#1f2937}.danger{background:#dc2626;color:white}.hint{margin-top:14px;color:#6b7280;font-size:13px;line-height:1.8;background:#fafafa;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}</style></head><body><div class="card"><h1>ESP32-HID Wi-Fi 配置</h1><p>开发板当前处于配置热点模式。保存 Wi-Fi 后，串口会输出新 IP。</p><form method="POST" action="/portal_save"><div class="field"><label>SSID</label><input name="ssid" placeholder="输入 Wi-Fi 名称"></div><div class="field"><label>Wi-Fi 密码</label><input name="password" type="password" placeholder="输入 Wi-Fi 密码"></div><button type="submit">保存并连接</button><a class="secondary" href="/portal_scan">扫描 Wi-Fi</a><a class="danger" href="/portal_clear">清空配置</a></form><div class="hint">配置热点：SG_Duck<br>默认热点密码：见本地 secrets.h<br>ESP32-S3 仅支持 2.4GHz Wi-Fi。</div></div></body></html>
 )rawliteral";
 
 // INDEX_HTML moved to LittleFS: /index.html
