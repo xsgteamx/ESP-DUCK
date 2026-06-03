@@ -24,44 +24,12 @@ ESP-DUCK 是一个基于 ESP32 / ESP32-S3 的 USB HID 控制项目，可通过 W
 ├── README.md
 ├── LICENSE
 ├── .gitignore
-├── config.example.h
 ├── src/
-│   └── main.cpp
+│   └── main.ino
 ├── data/
 │   └── index.html
-└── docs/
+└── online.html
 ```
-
-## ⚙️ Config
-
-真实配置不要提交到 GitHub。
-
-复制示例配置：
-
-```
-cp config.example.h config.h
-```
-
-修改 `config.h`：
-
-```
-#define WIFI_SSID "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
-#define WEB_AUTH_TOKEN "YOUR_WEB_AUTH_TOKEN"
-#define DEVICE_NAME "ESP_DUCK"
-#define DEFAULT_DELAY_MS 20
-```
-
-建议加入 `.gitignore`：
-
-```
-config.h
-.env
-secrets.h
-*.local
-```
-
-如果密码或 Token 已经提交到公开仓库，请直接更换。
 
 ## 🚀 Usage
 
