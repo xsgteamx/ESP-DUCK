@@ -2,179 +2,257 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ESP-DUCK Web Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32-HID Console</title>
   <style>
-    :root{
-      --bg:#0b1020;--card:#111827;--card2:#0f172a;--text:#e5e7eb;--muted:#94a3b8;
-      --line:#243244;--green:#22c55e;--blue:#38bdf8;--red:#ef4444;--yellow:#f59e0b;
+    :root {
+      --bg:#f4f6fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
+      --primary:#2563eb; --primaryDark:#1d4ed8; --secondary:#eef2f7; --danger:#dc2626;
+      --success:#16a34a; --warning:#d97706; --shadow:0 10px 30px rgba(15,23,42,.08);
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;min-height:100vh;color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
-      background:radial-gradient(circle at 20% 0%,rgba(34,197,94,.16),transparent 30%),
-                 radial-gradient(circle at 85% 10%,rgba(56,189,248,.14),transparent 28%),var(--bg);
-    }
-    main{max-width:980px;margin:0 auto;padding:28px 14px}
-    h1{font-size:42px;margin:0 0 8px;letter-spacing:-.04em}
-    .sub{color:var(--muted);line-height:1.7;margin-bottom:18px}
-    .grid{display:grid;grid-template-columns:1.4fr .6fr;gap:16px}
-    .card{background:linear-gradient(180deg,rgba(17,24,39,.96),rgba(15,23,42,.96));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
-    label{display:block;margin:12px 0 7px;color:var(--muted);font-size:13px}
-    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#06101f;color:var(--text);padding:11px 12px;font:inherit;outline:none}
-    textarea{min-height:260px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55}
-    input:focus,select:focus,textarea:focus{border-color:rgba(34,197,94,.8);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
-    .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-    button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer;color:#04110a;background:var(--green)}
-    button.secondary{background:#1f2937;color:var(--text);border:1px solid var(--line)}
-    button.danger{background:var(--red);color:white}
-    .pill{border:1px solid var(--line);border-radius:12px;background:rgba(2,6,23,.45);padding:10px 12px;color:var(--muted);margin-bottom:9px;overflow-wrap:anywhere}
-    .pill strong{color:var(--text)}
-    .check{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin-top:12px}
-    .check input{width:auto}
-    .hint{color:var(--muted);font-size:13px;line-height:1.7;margin-top:10px}
-    .warn{color:var(--yellow)}
-    pre{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;background:#020617;border:1px solid var(--line);border-radius:12px;padding:12px;color:#cbd5e1}
-    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}h1{font-size:34px}}
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px 14px 28px; }
+    .header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+    h1 { margin:0 0 6px; font-size:26px; }
+    h2 { margin:0 0 12px; font-size:20px; }
+    .sub { color:var(--muted); font-size:14px; line-height:1.7; }
+    .badge { white-space:nowrap; color:var(--primary); background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:6px 10px; font-size:13px; }
+    .tabs { display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:10px; }
+    .tabs button { flex:0 0 auto; border:1px solid var(--border); background:white; color:var(--text); border-radius:999px; padding:9px 13px; font-size:14px; }
+    .tabs button.active { background:var(--primary); color:white; border-color:var(--primary); }
+    .page { display:none; }
+    .page.active { display:block; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); padding:18px; margin-bottom:14px; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .stat { border:1px solid var(--border); background:#f9fafb; border-radius:16px; padding:14px; }
+    .stat-label { color:var(--muted); font-size:13px; margin-bottom:6px; }
+    .stat-value { font-weight:700; font-size:17px; word-break:break-all; }
+    .field { background:#f9fafb; border:1px solid var(--border); border-radius:14px; padding:10px; }
+    .field label { display:block; color:var(--muted); font-size:13px; margin-bottom:6px; }
+    input, select, textarea { width:100%; border:1px solid var(--border); border-radius:10px; padding:9px 10px; font-size:14px; outline:none; background:white; color:var(--text); }
+    textarea { height:38vh; min-height:260px; resize:vertical; line-height:1.6; font-family:Consolas,"JetBrains Mono",monospace; }
+    input:focus, select:focus, textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:14px; }
+    button, a.btn { border:none; border-radius:12px; padding:11px 18px; font-size:15px; cursor:pointer; text-decoration:none; display:inline-block; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .primary { color:white; background:var(--primary); }
+    .primary:hover { background:var(--primaryDark); }
+    .secondary { color:var(--text); background:var(--secondary); }
+    .danger { color:white; background:var(--danger); }
+    .hint { margin-top:14px; color:var(--muted); font-size:13px; line-height:1.8; background:#fafafa; border:1px dashed var(--border); border-radius:12px; padding:12px 14px; }
+    .status { font-size:13px; color:var(--muted); }
+    .status.ok { color:var(--success); } .status.warn { color:var(--warning); } .status.err { color:var(--danger); }
+    .counter { color:var(--muted); font-size:13px; margin-top:8px; }
+    .alert { border:1px solid #bfdbfe; background:#eff6ff; color:#1e3a8a; border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+    .alert.hidden { display:none; }
+    .alert.warn { border-color:#fde68a; background:#fffbeb; color:#92400e; }
+    .alert.ok { border-color:#bbf7d0; background:#f0fdf4; color:#166534; }
+    .alert.err { border-color:#fecaca; background:#fef2f2; color:#991b1b; }
+    .alert-title { font-weight:700; margin-bottom:6px; }
+    .wifi-list { display:grid; gap:8px; margin-top:12px; }
+    .wifi-item { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; border:1px solid var(--border); background:#f9fafb; border-radius:14px; padding:12px; cursor:pointer; }
+    .wifi-item:hover, .wifi-selected { border-color:var(--primary); background:#eff6ff; }
+    .wifi-ssid { font-weight:700; margin-bottom:4px; word-break:break-all; }
+    .wifi-meta, .wifi-signal { font-size:13px; color:var(--muted); }
+    .wifi-signal { text-align:right; }
+    .signal-icon { display:inline-flex; align-items:flex-end; gap:2px; height:18px; margin-bottom:4px; }
+    .signal-icon span { display:block; width:4px; border-radius:999px; background:#cbd5e1; }
+    .signal-icon span:nth-child(1) { height:5px; }
+    .signal-icon span:nth-child(2) { height:9px; }
+    .signal-icon span:nth-child(3) { height:13px; }
+    .signal-icon span:nth-child(4) { height:17px; }
+    .signal-icon.level-1 span:nth-child(-n+1),
+    .signal-icon.level-2 span:nth-child(-n+2),
+    .signal-icon.level-3 span:nth-child(-n+3),
+    .signal-icon.level-4 span:nth-child(-n+4) { background:var(--primary); }
+    .signal-icon.level-1 span:nth-child(1) { background:var(--warning); }
+    .wifi-empty { color:var(--muted); font-size:14px; padding:12px; border:1px dashed var(--border); border-radius:12px; background:#fafafa; }
+    .log { height:240px; overflow:auto; background:#0f172a; color:#d1d5db; border-radius:14px; padding:12px; font-family:Consolas,"JetBrains Mono",monospace; font-size:13px; white-space:pre-wrap; }
+    @media(max-width:760px){ .header{display:block}.badge{display:inline-block;margin-top:8px}.grid,.grid.two{grid-template-columns:1fr}.actions button,.actions a.btn{flex:1 1 auto;text-align:center}textarea{height:42vh;min-height:230px} }
   </style>
+<script src="/pinyin-pro.js"></script>
 </head>
 <body>
-<main>
-  <h1>🦆 ESP-DUCK</h1>
-  <div class="sub">On-device Web Console for ESP32-S3 USB HID keyboard sender.</div>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>ESP32-HID Console</h1>
+        <div class="sub">设备内置网页 · Wi-Fi 局域网控制 · USB HID 输出</div>
+      </div>
+      <div class="badge">Device Web UI</div>
+    </div>
 
-  <div class="grid">
-    <section class="card">
-      <form method="POST" action="/send">
-        <label>⌨️ Text</label>
-        <textarea name="text" id="text" spellcheck="false" placeholder="输入要发送的文本、命令或脚本片段"></textarea>
+    <div class="tabs">
+      <button class="active" data-page="overview" onclick="showPage('overview')">总览</button>
+      <button data-page="type" onclick="showPage('type')">文本输入</button>
+      <button data-page="keepalive" onclick="showPage('keepalive')">保活</button>
+      <button data-page="wifi" onclick="showPage('wifi')">Wi-Fi</button>
+      <button data-page="advanced" onclick="showPage('advanced')">参数</button>
+      <button data-page="logs" onclick="showPage('logs')">日志</button>
+    </div>
 
-        <div class="row">
-          <div>
-            <label>Char delay</label>
-            <input name="charDelay" type="number" min="1" max="800" value="70">
-          </div>
-          <div>
-            <label>Risk delay</label>
-            <input name="riskDelay" type="number" min="1" max="1000" value="140">
-          </div>
-          <div>
-            <label>Start delay</label>
-            <input name="startDelay" type="number" min="1000" max="30000" value="5000">
-          </div>
+    <section class="page active" id="page-overview">
+      <div class="card">
+        <h2>状态总览</h2>
+        <div class="grid">
+          <div class="stat"><div class="stat-label">设备</div><div class="stat-value" id="deviceName">未知</div></div>
+          <div class="stat"><div class="stat-label">固件</div><div class="stat-value" id="firmware">未知</div></div>
+          <div class="stat"><div class="stat-label">MAC</div><div class="stat-value" id="mac">未知</div></div>
+          <div class="stat"><div class="stat-label">Wi-Fi</div><div class="stat-value" id="wifiState">未知</div></div>
+          <div class="stat"><div class="stat-label">IP</div><div class="stat-value" id="ipAddr">未知</div></div>
+          <div class="stat"><div class="stat-label">保活</div><div class="stat-value" id="keepAliveState">未知</div></div>
         </div>
-
-        <div class="row">
-          <div>
-            <label>Line delay</label>
-            <input name="lineDelay" type="number" min="0" max="2000" value="400">
-          </div>
-          <div>
-            <label>Line start delay</label>
-            <input name="lineStartDelay" type="number" min="0" max="1000" value="150">
-          </div>
-          <div>
-            <label>Chunk size</label>
-            <input name="chunkSize" type="number" min="1" max="240" value="24">
-          </div>
-        </div>
-
-        <label>Chunk delay</label>
-        <input name="chunkDelay" type="number" min="0" max="1000" value="120">
-
         <div class="actions">
-          <button type="submit">🚀 Send</button>
-          <button class="secondary" type="button" onclick="loadExample()">📋 Example</button>
-          <button class="secondary" type="button" onclick="refreshStatus()">🔄 Status</button>
-          <a class="hint" href="/logout">Logout</a>
+          <button class="primary" onclick="queryStatus()">刷新状态</button>
+          <button class="secondary" onclick="sendReboot()">重启开发板</button>
+          <a class="btn secondary" href="/logout">退出登录</a>
         </div>
-
-        <div id="textHint" class="hint"></div>
-      </form>
+      </div>
     </section>
 
-    <aside class="card">
-      <h2 style="margin:0 0 12px">📡 Status</h2>
-      <div class="pill"><strong>Device:</strong> <span id="device">-</span></div>
-      <div class="pill"><strong>Firmware:</strong> <span id="firmware">-</span></div>
-      <div class="pill"><strong>Wi-Fi:</strong> <span id="wifi">-</span></div>
-      <div class="pill"><strong>IP:</strong> <span id="ip">-</span></div>
-      <div class="pill"><strong>Typing:</strong> <span id="typing">-</span></div>
-
-      <h3>🧊 Keep Alive</h3>
-      <form method="POST" action="/settings">
-        <label class="check">
-          <input type="checkbox" name="keepAliveEnabled">
-          Enable keep alive
-        </label>
-        <label>Interval seconds</label>
-        <input name="keepAliveInterval" type="number" min="10" max="86400" value="180">
-        <label>Action</label>
-        <select name="keepAliveAction">
-          <option value="mouse_move">mouse_move</option>
-          <option value="mouse_click">mouse_click</option>
-          <option value="f5">f5</option>
-          <option value="click_f5" selected>click_f5</option>
-          <option value="click_f5_loop">click_f5_loop</option>
-        </select>
+    <section class="page" id="page-type">
+      <div class="card">
+        <h2>文本输入</h2>
+        <div class="alert hidden" id="sendAlert"><div class="alert-title" id="sendAlertTitle"></div><div id="sendAlertText"></div></div>
+        <div class="grid" style="margin-bottom:12px">
+  <div class="field"><label>发送模式</label><select id="sendContentMode"><option value="text" selected>普通文本</option><option value="base64">Base64 纯输出</option></select></div>
+  <div class="field"><label>中文处理</label><select id="chineseMode"><option value="keep" selected>保留中文</option><option value="skip">跳过中文</option><option value="pinyin">中文转拼音</option></select></div>
+  <div class="field"><label>速度档位</label><select id="speedPreset"><option value="safe">保守：20ms/字符</option><option value="normal" selected>推荐：10ms/字符</option><option value="fast">激进：5ms/字符</option><option value="extreme">极限：2ms/字符</option></select></div>
+</div><textarea id="text" placeholder="输入或粘贴英文、代码、数字和 ASCII 符号。Base64 模式会只保留 A-Z a-z 0-9 + / = 并按 76 字符分行。"></textarea>
+        <div class="counter" id="counter">0 字符</div>
         <div class="actions">
-          <button class="secondary" type="submit">⚙️ Save</button>
+          <button class="primary" onclick="sendText()">发送，并开始倒计时输入</button>
+          <button class="secondary" onclick="saveDraft(true)">保存暂存</button>
+          <button class="secondary" onclick="loadDraft(true)">恢复暂存</button>
+          <button class="danger" onclick="clearDraft()">清空暂存</button>
         </div>
-      </form>
+        <div class="hint">发送前请把光标放到目标窗口。当前版本建议先用于英文、代码、数字和常见符号。</div>
+      </div>
+    </section>
 
-      <pre id="log">console ready</pre>
-      <p class="hint warn">🀄 中文建议先转拼音、英文或 Base64 后发送。</p>
-    </aside>
+    <section class="page" id="page-keepalive">
+      <div class="card">
+        <h2>保活模式</h2>
+        <div class="field"><label><input id="keepAliveEnabled" type="checkbox" style="width:auto"> 启用保活模式</label></div>
+        <div class="grid two" style="margin-top:12px">
+          <div class="field"><label>保活间隔 秒</label><input id="keepAliveInterval" type="number" value="180" min="10" max="86400"></div>
+          <div class="field"><label>保活动作</label><select id="keepAliveAction"><option value="mouse_move">鼠标轻微移动</option><option value="mouse_click">鼠标左键点击 1 次</option><option value="f5">按一次 F5</option><option value="click_f5" selected>鼠标左键点击 1 次 + F5 1 次</option><option value="click_f5_loop">鼠标点击 + F5，间隔 1 秒，共 10 次</option></select></div>
+        </div>
+        <div class="actions"><button class="primary" onclick="sendSettings()">保存保活设置</button></div>
+        <div class="hint">测试阶段建议间隔填 30 秒。复杂动作会实际影响鼠标和当前窗口，使用前确认光标位置。</div>
+      </div>
+    </section>
+
+    <section class="page" id="page-wifi">
+      <div class="card">
+        <h2>Wi-Fi 设置</h2>
+        <div class="actions">
+          <button class="primary" onclick="scanWifi()">扫描 Wi-Fi</button>
+          <button class="secondary" onclick="queryWifiStatus()">查询 Wi-Fi 状态</button>
+          <button class="danger" onclick="clearWifiConfig()">清空 Wi-Fi 配置</button>
+        </div>
+        <div class="wifi-list" id="wifiList"><div class="wifi-empty">暂无扫描结果。点击“扫描 Wi-Fi”。</div></div>
+        <div class="grid two" style="margin-top:12px">
+          <div class="field"><label>SSID</label><input id="wifiSsid" placeholder="选择或手动输入 SSID"></div>
+          <div class="field"><label>Wi-Fi 密码</label><input id="wifiPassword" type="password" placeholder="输入 Wi-Fi 密码"></div>
+        </div>
+        <div class="actions"><button class="primary" onclick="saveWifi()">保存并连接</button></div>
+        <div class="hint">ESP32-S3 仅支持 2.4GHz Wi-Fi。保存成功后，串口和状态页会显示新的 IP。</div>
+      </div>
+    </section>
+
+    <section class="page" id="page-advanced">
+      <div class="card">
+        <h2>高级参数</h2>
+        <div class="grid">
+          <div class="field"><label>普通字符延迟 ms</label><input id="charDelay" type="number" value="70" min="1" max="800"></div>
+          <div class="field"><label>特殊字符延迟 ms</label><input id="riskDelay" type="number" value="140" min="1" max="1000"></div>
+          <div class="field"><label>换行后等待 ms</label><input id="lineDelay" type="number" value="400" min="0" max="2000"></div>
+          <div class="field"><label>行首等待 ms</label><input id="lineStartDelay" type="number" value="150" min="0" max="1000"></div>
+          <div class="field"><label>每段字符数</label><input id="chunkSize" type="number" value="24" min="1" max="240"></div>
+          <div class="field"><label>每段暂停 ms</label><input id="chunkDelay" type="number" value="120" min="0" max="1000"></div>
+          <div class="field"><label>发送前倒计时 ms</label><input id="startDelay" type="number" value="3000" min="1000" max="30000"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-logs">
+      <div class="card">
+        <h2>日志</h2>
+        <div class="log" id="log"></div>
+        <div class="actions"><button class="secondary" onclick="clearLog()">清空日志</button></div>
+      </div>
+    </section>
   </div>
-</main>
 
-<script>
-  const $ = id => document.getElementById(id);
-
-  function log(msg) {
-    const el = $("log");
-    const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    el.textContent = (el.textContent + "\n" + line).split("\n").slice(-80).join("\n");
-    el.scrollTop = el.scrollHeight;
-  }
-
-  function analyzeText() {
-    const text = $("text").value;
-    const nonAscii = Array.from(text).filter(ch => ch.charCodeAt(0) > 127).length;
-    $("textHint").textContent = `${text.length} chars` + (nonAscii ? ` · ${nonAscii} non-ASCII chars` : "");
-    $("textHint").className = nonAscii ? "hint warn" : "hint";
-  }
-
-  function loadExample() {
-    $("text").value = "echo Hello from ESP-DUCK";
-    analyzeText();
-  }
-
-  async function refreshStatus() {
-    try {
-      const res = await fetch("/api/message", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({type: "status"})
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "status failed");
-      $("device").textContent = data.deviceName || "-";
-      $("firmware").textContent = data.firmware || "-";
-      $("wifi").textContent = data.wifiConnected ? (data.wifiSsid || "connected") : "not connected";
-      $("ip").textContent = data.ip || "-";
-      $("typing").textContent = data.typingActive ? "yes" : "no";
-      log("status updated");
-    } catch (e) {
-      log("status error: " + e.message);
+  <script>
+    const draftKey = "esp32_hid_device_page_draft_v1";
+    const ids = ["text","sendContentMode","chineseMode","speedPreset","charDelay","riskDelay","lineDelay","lineStartDelay","chunkSize","chunkDelay","startDelay","keepAliveEnabled","keepAliveInterval","keepAliveAction","wifiSsid","wifiPassword"];
+    
+    const SPEED_PRESETS={
+      safe:{label:"保守",charDelay:20,riskDelay:20,lineDelay:100,lineStartDelay:0,chunkSize:76,chunkDelay:50},
+      normal:{label:"推荐",charDelay:10,riskDelay:10,lineDelay:50,lineStartDelay:0,chunkSize:76,chunkDelay:30},
+      fast:{label:"激进",charDelay:5,riskDelay:5,lineDelay:30,lineStartDelay:0,chunkSize:76,chunkDelay:20},
+      extreme:{label:"极限",charDelay:2,riskDelay:2,lineDelay:20,lineStartDelay:0,chunkSize:76,chunkDelay:10}
+    };
+    function getSelectedSpeed(){const key=document.getElementById('speedPreset')?.value||'normal';return SPEED_PRESETS[key]||SPEED_PRESETS.normal;}
+    function applySpeedPreset(){const s=getSelectedSpeed();['charDelay','riskDelay','lineDelay','lineStartDelay','chunkSize','chunkDelay'].forEach(id=>{const el=document.getElementById(id);if(el&&s[id]!==undefined)el.value=s[id];});saveDraft(false);updateCounter();}
+    function isChineseChar(ch){return /[\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);}
+    function normalizeBase64(text,lineLength=76){const pure=String(text||'').replace(/[^A-Za-z0-9+/=]/g,'');if(!pure)return'';return pure.replace(new RegExp('(.{'+lineLength+'})','g'),'$1\n').trimEnd();}
+    function skipChineseChars(text){return Array.from(String(text||'')).filter(ch=>!isChineseChar(ch)).join('');}
+    function convertChineseToPinyin(text){
+      const lib=window.pinyinPro;
+      if(!lib||typeof lib.pinyin!=='function')throw new Error('当前页面没有加载 pinyin-pro，不能使用中文转拼音。在线页需要联网加载 CDN，设备页需要把 pinyin-pro.js 放到 LittleFS 根目录。');
+      return lib.pinyin(String(text||''),{toneType:'none',type:'array',nonZh:'consecutive'}).join('');
     }
-  }
+    function getProcessedText(raw){
+      const mode=document.getElementById('sendContentMode')?.value||'text';
+      if(mode==='base64')return normalizeBase64(raw,76);
+      const chineseMode=document.getElementById('chineseMode')?.value||'keep';
+      if(chineseMode==='skip')return skipChineseChars(raw);
+      if(chineseMode==='pinyin')return convertChineseToPinyin(raw);
+      return String(raw||'');
+    }
+    function getEffectiveConfig(){const cfg=collectConfig();const mode=document.getElementById('sendContentMode')?.value||'text';const speed=getSelectedSpeed();cfg.inputMode=mode;cfg.speedPreset=document.getElementById('speedPreset')?.value||'normal';cfg.speedLabel=speed.label;return cfg;}
+    
+    let sendTimer = null;
+    let lastWifiNetworks = [];
 
-  $("text").addEventListener("input", analyzeText);
-  analyzeText();
-  refreshStatus();
-</script>
+    function showPage(name){document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));}
+    function log(msg){const el=document.getElementById('log');if(!el)return;const now=new Date().toLocaleTimeString();const line='['+now+'] '+String(msg).slice(0,3000)+'\n';el.textContent+=line;if(el.textContent.length>60000)el.textContent=el.textContent.slice(-45000);el.scrollTop=el.scrollHeight;}
+    function clearLog(){document.getElementById('log').textContent='';}
+    function getNumber(id){return Number(document.getElementById(id).value);}
+    function normalizeKeepAliveAction(){const el=document.getElementById('keepAliveAction');if(!el)return;const allowed=[...el.options].map(o=>o.value);if(!allowed.includes(el.value))el.value='click_f5';}
+    function setKeepAliveActionValue(value){const el=document.getElementById('keepAliveAction');if(!el)return;const allowed=[...el.options].map(o=>o.value);el.value=allowed.includes(value)?value:'click_f5';}
+    function applyDeviceTypingConfig(obj){['charDelay','riskDelay','lineDelay','lineStartDelay','chunkSize','chunkDelay','startDelay'].forEach(id=>{const el=document.getElementById(id);if(el&&obj[id]!==undefined)el.value=obj[id];});}
+    function collectConfig(){return{charDelay:getNumber('charDelay'),riskDelay:getNumber('riskDelay'),lineDelay:getNumber('lineDelay'),lineStartDelay:getNumber('lineStartDelay'),chunkSize:getNumber('chunkSize'),chunkDelay:getNumber('chunkDelay'),startDelay:getNumber('startDelay')};}
+    function collectDraft(){const d={};ids.forEach(id=>{const e=document.getElementById(id);if(!e)return;d[id]=e.type==='checkbox'?e.checked:e.value;});return d;}
+    function applyDraft(d){if(!d)return;ids.forEach(id=>{const e=document.getElementById(id);if(!e||d[id]===undefined)return;if(e.type==='checkbox')e.checked=!!d[id];else e.value=d[id];});normalizeKeepAliveAction();updateCounter();}
+    function saveDraft(show){localStorage.setItem(draftKey,JSON.stringify(collectDraft()));updateCounter();if(show)log('已保存暂存');}
+    function loadDraft(show){const raw=localStorage.getItem(draftKey);if(!raw){if(show)log('没有暂存内容');return;}try{applyDraft(JSON.parse(raw));if(show)log('已恢复暂存');}catch(e){log('暂存恢复失败：'+e.message);}}
+    function clearDraft(){localStorage.removeItem(draftKey);document.getElementById('text').value='';updateCounter();log('已清空暂存');}
+    function updateCounter(){const t=document.getElementById('text').value||'';document.getElementById('counter').innerText=t.length+' 字符';}
+    function showAlert(cls,title,text){const b=document.getElementById('sendAlert');b.className='alert '+(cls||'');document.getElementById('sendAlertTitle').innerText=title;document.getElementById('sendAlertText').innerText=text;}
+    function startCountdown(ms){if(sendTimer)clearInterval(sendTimer);let remain=Math.ceil(ms/1000);showAlert('warn','已发送到开发板，准备输入','请在 '+remain+' 秒内把光标放到目标窗口。');sendTimer=setInterval(()=>{remain--;if(remain>0){showAlert('warn','已发送到开发板，准备输入','请在 '+remain+' 秒内把光标放到目标窗口。');return;}clearInterval(sendTimer);sendTimer=null;showAlert('ok','正在输入','开发板应该已经开始模拟键盘输入，请不要移动光标或切换窗口。');},1000);}
+    async function sendMessage(obj){const res=await fetch('/api/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});const data=await res.json();handleDeviceJson(data);log('返回：'+JSON.stringify(data));return data;}
+    async function sendText(){const raw=document.getElementById('text').value||'';let text='';try{text=getProcessedText(raw);}catch(e){showAlert('err','发送失败',e.message||'文本处理失败');log('文本处理失败：'+(e.message||'未知错误'));return;}if(!text.length){showAlert('err','发送失败','处理后没有可发送内容。');return;}saveDraft(false);const cfg=getEffectiveConfig();const startDelay=cfg.startDelay;const speed=getSelectedSpeed();showAlert('warn','正在发送到开发板','文本已提交，准备开始倒计时。处理后长度：'+text.length+' 字符。档位：'+speed.label);try{const request=sendMessage({type:'type',text,config:cfg});startCountdown(startDelay);log('发送请求已提交。处理后长度：'+text.length+' 字符；模式：'+cfg.inputMode+'；档位：'+speed.label);await request;showAlert('ok','输入完成','开发板已返回完成状态。处理后长度：'+text.length+' 字符。');}catch(e){showAlert('err','发送失败',e.message||'未知错误');log('发送失败：'+(e.message||'未知错误'));}}
+    async function sendSettings(){await sendMessage({type:'settings',keepAliveEnabled:document.getElementById('keepAliveEnabled').checked,keepAliveInterval:getNumber('keepAliveInterval'),keepAliveAction:document.getElementById('keepAliveAction').value});}
+    async function queryStatus(){await sendMessage({type:'status'});}
+    async function sendReboot(){if(confirm('确认重启开发板？'))await sendMessage({type:'reboot'});}
+    async function scanWifi(){document.getElementById('wifiList').innerHTML='<div class="wifi-empty">正在扫描 Wi-Fi，通常需要 3 到 8 秒...</div>';await sendMessage({type:'wifi_scan'});}
+    async function queryWifiStatus(){await sendMessage({type:'wifi_status'});}
+    async function clearWifiConfig(){if(confirm('确认清空 Wi-Fi 配置？'))await sendMessage({type:'wifi_clear'});}
+    async function saveWifi(){const ssid=document.getElementById('wifiSsid').value.trim();const password=document.getElementById('wifiPassword').value;if(!ssid){alert('SSID 不能为空');return;}await sendMessage({type:'wifi_save',ssid,password});}
+    function handleDeviceJson(obj){if(!obj||typeof obj!=='object')return;if(obj.type==='status'){document.getElementById('deviceName').innerText=obj.deviceName||'未知';document.getElementById('firmware').innerText=obj.firmware||'未知';document.getElementById('mac').innerText=obj.mac||'未知';document.getElementById('wifiState').innerText=obj.wifiConnected?(obj.wifiSsid||'已连接'):'未连接';document.getElementById('ipAddr').innerText=obj.ip||'无';document.getElementById('keepAliveState').innerText=obj.keepAliveEnabled?'开启':'关闭';document.getElementById('keepAliveEnabled').checked=!!obj.keepAliveEnabled;if(obj.keepAliveInterval)document.getElementById('keepAliveInterval').value=obj.keepAliveInterval;if(obj.keepAliveAction)setKeepAliveActionValue(obj.keepAliveAction);normalizeKeepAliveAction();applyDeviceTypingConfig(obj);return;}if(obj.type==='wifi_status'){document.getElementById('wifiState').innerText=obj.connected?(obj.ssid||'已连接'):'未连接';document.getElementById('ipAddr').innerText=obj.ip||'无';return;}if(obj.type==='wifi_scan'&&Array.isArray(obj.networks)){renderWifiList(obj.networks);return;}if(obj.type==='wifi_save'){if(obj.connected){log('Wi-Fi 连接成功，IP：'+obj.ip);document.getElementById('ipAddr').innerText=obj.ip||'无';document.getElementById('wifiState').innerText=obj.ssid||'已连接';}else{log('Wi-Fi 连接失败：'+(obj.msg||'未知原因'));}return;}if(obj.ok===false){log('错误：'+(obj.msg||JSON.stringify(obj)));}}
+    function esc(s){return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');}
+    function signalLevel(rssi){if(rssi>=-55)return 4;if(rssi>=-67)return 3;if(rssi>=-75)return 2;return 1;}
+    function signalIcon(rssi){const level=signalLevel(rssi);return `<div class="signal-icon level-${level}" title="RSSI ${rssi} dBm"><span></span><span></span><span></span><span></span></div>`;}
+    function signalText(rssi){if(rssi>=-55)return'强';if(rssi>=-67)return'较强';if(rssi>=-75)return'一般';return'弱';}
+    function renderWifiList(networks){lastWifiNetworks=networks||[];const box=document.getElementById('wifiList');if(!lastWifiNetworks.length){box.innerHTML='<div class="wifi-empty">没有扫描到 Wi-Fi。</div>';return;}const sorted=[...lastWifiNetworks].sort((a,b)=>(b.rssi||-999)-(a.rssi||-999));box.innerHTML=sorted.map((item,index)=>{const ssid=item.ssid||'';const rssi=Number(item.rssi||0);const channel=item.channel||'';const encrypted=item.encrypted?'加密':'开放';return `<div class="wifi-item" onclick="selectWifi(${index})"><div><div class="wifi-ssid">${esc(ssid)||'(隐藏 SSID)'}</div><div class="wifi-meta">信道 ${channel} · ${encrypted} · RSSI ${rssi} dBm</div></div><div class="wifi-signal">${signalIcon(rssi)}<div>${signalText(rssi)}</div></div></div>`;}).join('');log('Wi-Fi 列表已渲染，共 '+sorted.length+' 个。');}
+    function selectWifi(index){const sorted=[...lastWifiNetworks].sort((a,b)=>(b.rssi||-999)-(a.rssi||-999));const item=sorted[index];if(!item)return;document.getElementById('wifiSsid').value=item.ssid||'';document.querySelectorAll('.wifi-item').forEach(e=>e.classList.remove('wifi-selected'));const nodes=document.querySelectorAll('.wifi-item');if(nodes[index])nodes[index].classList.add('wifi-selected');saveDraft(false);log('已选择 Wi-Fi：'+(item.ssid||'(隐藏 SSID)'));}
+    window.addEventListener('DOMContentLoaded',()=>{loadDraft(false);normalizeKeepAliveAction();ids.forEach(id=>{const e=document.getElementById(id);if(!e)return;e.addEventListener('input',()=>saveDraft(false));e.addEventListener('change',()=>{if(id==='speedPreset')applySpeedPreset();else saveDraft(false);});});updateCounter();queryStatus().catch(e=>log('状态查询失败：'+e.message));});
+  </script>
 </body>
 </html>
