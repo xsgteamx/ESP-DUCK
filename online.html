@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ESP-DUCK Online Console</title>
+  <style>
+    body{margin:0;min-height:100vh;background:#0b1020;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
+    main{max-width:900px;margin:0 auto;padding:28px 14px}
+    h1{font-size:40px;margin:0 0 8px}
+    p{color:#94a3b8;line-height:1.7}
+    .card{background:#111827;border:1px solid #243244;border-radius:18px;padding:18px;margin-top:16px}
+    label{display:block;margin:12px 0 7px;color:#94a3b8}
+    input,textarea{width:100%;box-sizing:border-box;border:1px solid #243244;border-radius:12px;background:#06101f;color:#e5e7eb;padding:11px 12px;font:inherit}
+    textarea{min-height:240px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer;background:#22c55e;color:#04110a;margin-top:14px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#020617;border:1px solid #243244;border-radius:12px;padding:12px;color:#cbd5e1}
+  </style>
+</head>
+<body>
+<main>
+  <h1>🦆 ESP-DUCK Online Console</h1>
+  <p>这是可部署到 Vercel 的示例页面，用于向 ESP-DUCK 的 <code>/api/message</code> 发送 JSON 请求。</p>
+
+  <div class="card">
+    <label>Device API URL</label>
+    <input id="url" value="http://192.168.1.100/api/message">
+
+    <label>Token</label>
+    <input id="token" type="password" placeholder="CHANGE_ME_WEB_PASSWORD">
+
+    <label>Text</label>
+    <textarea id="text">echo Hello from ESP-DUCK</textarea>
+
+    <button onclick="sendText()">🚀 Send</button>
+    <button onclick="status()">📡 Status</button>
+
+    <pre id="log">ready</pre>
+  </div>
+
+  <p>注意：公网 HTTPS 页面访问局域网 HTTP 设备时，可能受到浏览器 mixed content、CORS 或 Private Network Access 限制。设备内置 WebUI 更适合离线使用。</p>
+</main>
+
+<script>
+  function log(obj) {
+    document.getElementById("log").textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+  }
+
+  async function post(payload) {
+    payload.token = document.getElementById("token").value;
+    const res = await fetch(document.getElementById("url").value, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  }
+
+  async function sendText() {
+    try {
+      const result = await post({
+        type: "type",
+        text: document.getElementById("text").value,
+        config: {
+          charDelay: 70,
+          riskDelay: 140,
+          lineDelay: 400,
+          lineStartDelay: 150,
+          chunkSize: 24,
+          chunkDelay: 120,
+          startDelay: 5000
+        }
+      });
+      log(result);
+    } catch (e) {
+      log("error: " + e.message);
+    }
+  }
+
+  async function status() {
+    try {
+      log(await post({type: "status"}));
+    } catch (e) {
+      log("error: " + e.message);
+    }
+  }
+</script>
+</body>
+</html>

@@ -15,21 +15,30 @@ ESP-DUCK 是一个基于 ESP32 / ESP32-S3 的 USB HID 控制项目，可通过 W
 * ⚙️ 支持变量配置，例如延迟、设备名、Token 等
 * 🀄 支持中文内容预处理，例如拼音转写后发送
 * 💾 支持 LittleFS / SPIFFS 存放前端页面
-* 🔐 配置文件本地化，避免密码和 Token 写入仓库
+* 🔐 密码和 Token 使用占位符，避免真实敏感信息写入仓库
 
 ## 📁 Project Structure
 
-```
-.
-├── README.md
-├── LICENSE
-├── .gitignore
-├── src/
-│   └── main.ino
-├── data/
-│   └── index.html
-└── online.html
-```
+    .
+    ├── README.md
+    ├── LICENSE
+    ├── .gitignore
+    ├── src/
+    │   └── main.ino
+    ├── data/
+    │   └── index.html
+    └── online.html
+
+## 🔐 Default Placeholders
+
+请在本地修改 `src/main.ino` 顶部配置：
+
+    const char* WEB_PASSWORD = "CHANGE_ME_WEB_PASSWORD";
+    const char* SETUP_AP_SSID = "ESP-DUCK";
+    const char* SETUP_AP_PASS = "CHANGE_ME_12345678";
+    const char* DEVICE_NAME = "ESP-DUCK";
+
+注意：`SETUP_AP_PASS` 至少 8 位。
 
 ## 🚀 Usage
 
@@ -47,16 +56,12 @@ ESP-DUCK 是一个基于 ESP32 / ESP32-S3 的 USB HID 控制项目，可通过 W
 
 PlatformIO 示例：
 
-```
-pio run
-pio run --target upload
-```
+    pio run
+    pio run --target upload
 
 上传 WebUI 文件：
 
-```
-pio run --target uploadfs
-```
+    pio run --target uploadfs
 
 Arduino IDE 用户可使用 LittleFS / SPIFFS 上传插件。
 

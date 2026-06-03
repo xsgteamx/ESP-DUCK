@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ESP-DUCK Web Console</title>
+  <style>
+    :root{
+      --bg:#0b1020;--card:#111827;--card2:#0f172a;--text:#e5e7eb;--muted:#94a3b8;
+      --line:#243244;--green:#22c55e;--blue:#38bdf8;--red:#ef4444;--yellow:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+      background:radial-gradient(circle at 20% 0%,rgba(34,197,94,.16),transparent 30%),
+                 radial-gradient(circle at 85% 10%,rgba(56,189,248,.14),transparent 28%),var(--bg);
+    }
+    main{max-width:980px;margin:0 auto;padding:28px 14px}
+    h1{font-size:42px;margin:0 0 8px;letter-spacing:-.04em}
+    .sub{color:var(--muted);line-height:1.7;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:1.4fr .6fr;gap:16px}
+    .card{background:linear-gradient(180deg,rgba(17,24,39,.96),rgba(15,23,42,.96));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+    label{display:block;margin:12px 0 7px;color:var(--muted);font-size:13px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#06101f;color:var(--text);padding:11px 12px;font:inherit;outline:none}
+    textarea{min-height:260px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55}
+    input:focus,select:focus,textarea:focus{border-color:rgba(34,197,94,.8);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
+    .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer;color:#04110a;background:var(--green)}
+    button.secondary{background:#1f2937;color:var(--text);border:1px solid var(--line)}
+    button.danger{background:var(--red);color:white}
+    .pill{border:1px solid var(--line);border-radius:12px;background:rgba(2,6,23,.45);padding:10px 12px;color:var(--muted);margin-bottom:9px;overflow-wrap:anywhere}
+    .pill strong{color:var(--text)}
+    .check{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin-top:12px}
+    .check input{width:auto}
+    .hint{color:var(--muted);font-size:13px;line-height:1.7;margin-top:10px}
+    .warn{color:var(--yellow)}
+    pre{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;background:#020617;border:1px solid var(--line);border-radius:12px;padding:12px;color:#cbd5e1}
+    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}h1{font-size:34px}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>🦆 ESP-DUCK</h1>
+  <div class="sub">On-device Web Console for ESP32-S3 USB HID keyboard sender.</div>
+
+  <div class="grid">
+    <section class="card">
+      <form method="POST" action="/send">
+        <label>⌨️ Text</label>
+        <textarea name="text" id="text" spellcheck="false" placeholder="输入要发送的文本、命令或脚本片段"></textarea>
+
+        <div class="row">
+          <div>
+            <label>Char delay</label>
+            <input name="charDelay" type="number" min="1" max="800" value="70">
+          </div>
+          <div>
+            <label>Risk delay</label>
+            <input name="riskDelay" type="number" min="1" max="1000" value="140">
+          </div>
+          <div>
+            <label>Start delay</label>
+            <input name="startDelay" type="number" min="1000" max="30000" value="5000">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Line delay</label>
+            <input name="lineDelay" type="number" min="0" max="2000" value="400">
+          </div>
+          <div>
+            <label>Line start delay</label>
+            <input name="lineStartDelay" type="number" min="0" max="1000" value="150">
+          </div>
+          <div>
+            <label>Chunk size</label>
+            <input name="chunkSize" type="number" min="1" max="240" value="24">
+          </div>
+        </div>
+
+        <label>Chunk delay</label>
+        <input name="chunkDelay" type="number" min="0" max="1000" value="120">
+
+        <div class="actions">
+          <button type="submit">🚀 Send</button>
+          <button class="secondary" type="button" onclick="loadExample()">📋 Example</button>
+          <button class="secondary" type="button" onclick="refreshStatus()">🔄 Status</button>
+          <a class="hint" href="/logout">Logout</a>
+        </div>
+
+        <div id="textHint" class="hint"></div>
+      </form>
+    </section>
+
+    <aside class="card">
+      <h2 style="margin:0 0 12px">📡 Status</h2>
+      <div class="pill"><strong>Device:</strong> <span id="device">-</span></div>
+      <div class="pill"><strong>Firmware:</strong> <span id="firmware">-</span></div>
+      <div class="pill"><strong>Wi-Fi:</strong> <span id="wifi">-</span></div>
+      <div class="pill"><strong>IP:</strong> <span id="ip">-</span></div>
+      <div class="pill"><strong>Typing:</strong> <span id="typing">-</span></div>
+
+      <h3>🧊 Keep Alive</h3>
+      <form method="POST" action="/settings">
+        <label class="check">
+          <input type="checkbox" name="keepAliveEnabled">
+          Enable keep alive
+        </label>
+        <label>Interval seconds</label>
+        <input name="keepAliveInterval" type="number" min="10" max="86400" value="180">
+        <label>Action</label>
+        <select name="keepAliveAction">
+          <option value="mouse_move">mouse_move</option>
+          <option value="mouse_click">mouse_click</option>
+          <option value="f5">f5</option>
+          <option value="click_f5" selected>click_f5</option>
+          <option value="click_f5_loop">click_f5_loop</option>
+        </select>
+        <div class="actions">
+          <button class="secondary" type="submit">⚙️ Save</button>
+        </div>
+      </form>
+
+      <pre id="log">console ready</pre>
+      <p class="hint warn">🀄 中文建议先转拼音、英文或 Base64 后发送。</p>
+    </aside>
+  </div>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function log(msg) {
+    const el = $("log");
+    const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.textContent = (el.textContent + "\n" + line).split("\n").slice(-80).join("\n");
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function analyzeText() {
+    const text = $("text").value;
+    const nonAscii = Array.from(text).filter(ch => ch.charCodeAt(0) > 127).length;
+    $("textHint").textContent = `${text.length} chars` + (nonAscii ? ` · ${nonAscii} non-ASCII chars` : "");
+    $("textHint").className = nonAscii ? "hint warn" : "hint";
+  }
+
+  function loadExample() {
+    $("text").value = "echo Hello from ESP-DUCK";
+    analyzeText();
+  }
+
+  async function refreshStatus() {
+    try {
+      const res = await fetch("/api/message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({type: "status"})
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "status failed");
+      $("device").textContent = data.deviceName || "-";
+      $("firmware").textContent = data.firmware || "-";
+      $("wifi").textContent = data.wifiConnected ? (data.wifiSsid || "connected") : "not connected";
+      $("ip").textContent = data.ip || "-";
+      $("typing").textContent = data.typingActive ? "yes" : "no";
+      log("status updated");
+    } catch (e) {
+      log("status error: " + e.message);
+    }
+  }
+
+  $("text").addEventListener("input", analyzeText);
+  analyzeText();
+  refreshStatus();
+</script>
+</body>
+</html>
